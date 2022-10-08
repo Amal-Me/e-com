@@ -7,7 +7,7 @@ import { auth } from '../../firebase/config';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { SET_ACTIVE_USER } from '../../redux/slice/authSlice';
+import { REMOVE_ACTIVE_USER, SET_ACTIVE_USER } from '../../redux/slice/authSlice';
 
 
 // logo (marque)séparé pr pouvoir le réutiliser ailleurs
@@ -43,20 +43,27 @@ const Header = () => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // console.log(user);
-        // const uid = user.uid;
-        // console.log(user.displayName)
-        setDisplayName(user.displayName);
-
-        dispatch(SET_ACTIVE_USER({
+        if(user.displayName == null) {
+          // on convertit le texte de l email en nom d utilisateur arguments(a partir de quel car., jusqu'a quel car.)
+          const u1 = user.email.substring(0, user.email.indexOf("@"));
+          const uName = u1.charAt(0).toUpperCase() + u1.slice(1);
+          setDisplayName(uName);
+        } else {
+          setDisplayName(user.displayName);
+        }
+        
+        dispatch(
+          SET_ACTIVE_USER({
           email: user.email,
-          userName: user.displayName,
+          userName: user.displayName ? user.displayName : displayName,
           userID: user.uid,
         }))
       } else {
-        setDisplayName("")
+        setDisplayName("");
+        dispatch(REMOVE_ACTIVE_USER());
       }
     });
-  }, [])
+  }, [dispatch, displayName])
   
 
   const toggleMenu = () => {
@@ -112,7 +119,7 @@ const Header = () => {
               <NavLink to="/login" className={activeLink}>
                 Login
               </NavLink>
-              <a href="#">
+              <a href="#home">
                 <FaUserCircle size={16}/>
                 Hi, {displayName}
               </a>
