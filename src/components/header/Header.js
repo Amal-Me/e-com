@@ -8,6 +8,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { REMOVE_ACTIVE_USER, SET_ACTIVE_USER } from '../../redux/slice/authSlice';
+import ShowOnLogin, { ShowOnLogout } from '../hiddenLink/hiddenLink';
 
 
 // logo (marque)séparé pr pouvoir le réutiliser ailleurs
@@ -63,7 +64,7 @@ const Header = () => {
         dispatch(REMOVE_ACTIVE_USER());
       }
     });
-  }, [dispatch, displayName])
+  }, [dispatch, displayName]);
   
 
   const toggleMenu = () => {
@@ -116,22 +117,27 @@ const Header = () => {
           {/* pas . et tableau pr les nom avec - */}
           <div className={styles["header-right"]} onClick={hideMenu}>
             <span className={styles.links}>
+              <ShowOnLogout>
               <NavLink to="/login" className={activeLink}>
                 Login
               </NavLink>
-              <a href="#home">
+              </ShowOnLogout>
+              <ShowOnLogin>
+              <a href="#home" style={{color: "#ff7722"}}>
                 <FaUserCircle size={16}/>
                 Hi, {displayName}
               </a>
-              <NavLink to="/register" className={activeLink}>
-                Register
-              </NavLink>
+              </ShowOnLogin>
+              <ShowOnLogin>
               <NavLink to="/order-history" className={activeLink}>
                 My Orders
               </NavLink>
+              </ShowOnLogin>
+              <ShowOnLogin> 
               <NavLink to="/" onClick={logoutUser}>
                 Logout
               </NavLink>
+              </ShowOnLogin>
             </span>
             {cart}
           </div>
