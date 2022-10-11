@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import "./Slider.scss";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai";
 import { sliderData } from './slider-data';
@@ -6,6 +6,10 @@ import { sliderData } from './slider-data';
 const Slider = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const slideLength = sliderData.length;
+
+    const autoScroll = true;
+    let slideInterval;
+    let intervalTime = 5000;
 
     const nextSlide = () => {
         // si c'est la derniere img on revient a 0 sinon + 1
@@ -16,6 +20,22 @@ const Slider = () => {
         setCurrentSlide(currentSlide === 0  ? slideLength -1 : currentSlide - 1);
     };
 
+    useEffect(() => {
+    setCurrentSlide(0)
+    }, []);
+
+    
+
+    useEffect(() => {
+        if(autoScroll) {
+          const auto = () => {
+            slideInterval = setInterval(nextSlide, intervalTime)
+          };
+          auto();
+        }
+        return () => clearInterval(slideInterval);
+      }, [autoScroll, currentSlide, slideInterval]);
+    
   return (
     <div className='slider'>
       <AiOutlineArrowLeft className='arrow prev' onClick={prevSlide}/>
