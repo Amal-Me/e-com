@@ -2,8 +2,12 @@ import { useState } from 'react';
 import Card from '../../card/Card';
 import styles from "./AddProduct.module.scss";
 import {getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
-import {storage} from "../../../firebase/config";
+import {db, storage} from "../../../firebase/config";
 import { toast } from 'react-toastify';
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import Loader from '../../loader/Loader';
+
 
 const categories = [
   {id: 1, name: "Laptop"},
@@ -12,18 +16,25 @@ const categories = [
   {id: 4, name: "Phone"},
 ]
 
-const AddProduct = () => {
-  const [product, setProduct] = useState({
+const initialState = {
     name: "",
     imageURL: "",
     price: 0,
     category: "",
     brand: "",
     desc: "",
+};
+
+const AddProduct = () => {
+  const [product, setProduct] = useState({
+    ...initialState
   });
 
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const navigate = useNavigate();
+  
   const handleInputChange = (e) => {
     // destructur target
     const {name, value} = e.target
@@ -60,11 +71,35 @@ const AddProduct = () => {
   };
 
   const addProduct = (e) => {
-    e.preventDefault()
-    console.log(product)
+    e.preventDefault();
+    // console.log(product);
+    setIsLoading(true);
+
+    try {
+      // Add a new document with a generated id.
+      const docRef = addDoc(collection(db, "products"), {
+        name: product.name,
+        imageURL: product.imageURL,
+        price: Number(product.price),
+        category: product.category,
+        brand: product.brand,
+        desc: product.desc,
+        createdAt: Timestamp.now().toDate()
+      });
+      setIsLoading(false);
+      setUploadProgress(0);
+      setProduct({...initialState});
+      toast.success("Product uploaded successfully.");
+      navigate("/admin/all-products");
+    } catch (error) {
+      setIsLoading(false);
+      toast.error(error.message)
+    }
   };
 
   return (
+    <>
+    {isLoading && <Loader/>}
     <div className={styles.product}>
       <h1>Add New Product</h1>
       <Card cardClass={styles.card}>
@@ -120,6 +155,7 @@ const AddProduct = () => {
         </form>
       </Card>
     </div>
+    </>
   )
 };
 
