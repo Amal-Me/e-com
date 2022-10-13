@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import Card from '../../card/Card';
 import styles from "./AddProduct.module.scss";
+import {getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
+import {storage} from "../../../firebase/config";
+import { toast } from 'react-toastify';
 
 const categories = [
   {id: 1, name: "Laptop"},
@@ -13,33 +16,83 @@ const AddProduct = () => {
   const [product, setProduct] = useState({
     name: "",
     imageURL: "",
-    price: null,
+    price: 0,
     category: "",
     brand: "",
     desc: "",
-  })
+  });
 
-  const handleInputChange = (e) => {};
-  const handleImageChange = (e) => {};
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleInputChange = (e) => {
+    // destructur target
+    const {name, value} = e.target
+    setProduct({...product, [name]: value})
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+
+    // stockage firebase
+    const storageRef = ref(storage, `ecom/${Date.now()}${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+
+    // barre de progression de telechargement
+    uploadTask.on('state_changed', 
+    (snapshot) => {
+      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      // state de chargement
+      setUploadProgress(progress);
+      
+    }, 
+    (error) => {
+      toast.error(error.message);
+    }, 
+    () => {    
+      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        //url ds le state du prod
+        setProduct({...product, imageURL:downloadURL});
+        toast.success("Image uploaded successfully.");
+      });
+    }
+  );
+  };
+
+  const addProduct = (e) => {
+    e.preventDefault()
+    console.log(product)
+  };
 
   return (
     <div className={styles.product}>
       <h1>Add New Product</h1>
       <Card cardClass={styles.card}>
-        <form >
+        <form onSubmit={addProduct}>
         <label>Product name:</label>
         <input type="text" placeholder='product name' required name="name" value={product.name} onChange={(e) => handleInputChange(e)}/>
 
         <label>Product image:</label>
         <Card cardClass={styles.group}>
+          {uploadProgress === 0 ? null : (
           <div className={styles.progress}>
-            <div className={styles["progress-bar"]} style={{width: "50%"}}>
-              Uploading 50%
+
+            <div className={styles["progress-bar"]} style={{width: `${uploadProgress}%`}}>
+              {uploadProgress < 100 ? `Uploading ${uploadProgress}` : `Upload Complete ${uploadProgress}%`}
             </div>
           </div>
+          )}
+          
 
           <input type="file"  accept="image/*"placeholder='product image' name="image" onChange={(e) => handleImageChange(e)}/>
-          <input type="text" required name="imageURL" value={product.imageURL} disabled/>
+
+          {product.imageURL === "" ? null : (
+              <input type="text" 
+              // required 
+              placeholder='image url'
+              name="imageURL" 
+              value={product.imageURL} disabled/>
+          )}          
         </Card>
 
         <label>Product Price:</label>
