@@ -8,11 +8,16 @@ import {FaEdit, FaTrashAlt} from "react-icons/fa";
 import Loader from '../../loader/Loader';
 import { deleteObject, ref } from 'firebase/storage';
 import Notiflix from 'notiflix';
+import { useDispatch } from 'react-redux';
+import { STORE_PRODUCTS } from '../../../redux/slice/productSlice';
+
 
 
 const ViewProducts = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const dispatch = useDispatch();
 
   // fetch les produits au chargement de la page
   useEffect(() => {
@@ -35,9 +40,14 @@ const ViewProducts = () => {
             id: doc.id,
             ...doc.data(),
           }));
-          console.log(allProducts);
+          // console.log(allProducts);
           setProducts(allProducts);
           setIsLoading(false);
+          // on stock le state "allProducts" ds le store
+          dispatch(
+            STORE_PRODUCTS({
+              products: allProducts,
+            }))
         });   
       
       } catch (error) {
@@ -123,7 +133,8 @@ const ViewProducts = () => {
                 {`$${price}`}
               </td>
               <td className={styles.icons}>
-                <Link to="/admin/add-product">
+                {/* on specifie l id en params pr editer LE prod specifié */}
+                <Link to={`/admin/add-product/${id}`}>
                   <FaEdit size={20} color="green"/>
                 </Link>
                 &nbsp;

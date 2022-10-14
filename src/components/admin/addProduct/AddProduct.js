@@ -5,8 +5,12 @@ import {getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
 import {db, storage} from "../../../firebase/config";
 import { toast } from 'react-toastify';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../loader/Loader';
+import { useSelector } from 'react-redux';
+import { selectProducts } from '../../../redux/slice/productSlice';
+
+
 
 
 const categories = [
@@ -26,14 +30,32 @@ const initialState = {
 };
 
 const AddProduct = () => {
-  const [product, setProduct] = useState({
-    ...initialState
+  const {id} = useParams();
+  // recherche le prod du store par son id pr l editer
+  const products = useSelector(selectProducts);
+  const productEdit = products.find((item) => item.id === id);
+  console.log(productEdit);
+ 
+  // state initial vide pr "add new product" et "productEdit" pr garder les datas du prod a editer
+  const [product, setProduct] = useState(() => {
+    const newState = detectForm(id,
+      { ...initialState },
+      productEdit)
+      return newState;
   });
 
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+ 
+
+  function detectForm(id, f1, f2) {
+    if(id === "ADD") {
+      return f1;
+    }
+    return f2;
+  }
   
   const handleInputChange = (e) => {
     // destructur target
@@ -97,13 +119,27 @@ const AddProduct = () => {
     }
   };
 
+  const editProduct = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+
+
+      
+    } catch (error) {
+      setIsLoading(false);
+      toast.error(error.message);
+    }
+  };
+
   return (
     <>
     {isLoading && <Loader/>}
     <div className={styles.product}>
-      <h1>Add New Product</h1>
+      <h2>{detectForm(id, "Add New Product", "Edit Product") }</h2>
       <Card cardClass={styles.card}>
-        <form onSubmit={addProduct}>
+        <form onSubmit={detectForm(id, addProduct, editProduct)}>
         <label>Product name:</label>
         <input type="text" placeholder='product name' required name="name" value={product.name} onChange={(e) => handleInputChange(e)}/>
 
@@ -151,7 +187,7 @@ const AddProduct = () => {
         <label>Product Description:</label>
         <textarea name="desc" value={product.desc} onChange={(e) => handleInputChange(e)} cols="30" rows="10"></textarea>
 
-        <button className='--btn --btn-primary'>Save Product</button>
+        <button className='--btn --btn-primary'>{detectForm(id, "Save Product", "Edit Product")}</button>
         </form>
       </Card>
     </div>
