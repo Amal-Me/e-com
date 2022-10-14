@@ -1,10 +1,14 @@
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { db } from '../../../firebase/config';
+import { db, storage } from '../../../firebase/config';
 import styles from "./ViewProducts.module.scss";
 import {FaEdit, FaTrashAlt} from "react-icons/fa";
+import Loader from '../../loader/Loader';
+import { deleteObject, ref } from 'firebase/storage';
+import Notiflix from 'notiflix';
+
 
 const ViewProducts = () => {
   const [products, setProducts] = useState([]);
@@ -40,9 +44,48 @@ const ViewProducts = () => {
         setIsLoading(false);
         toast.error(error.message);
       }
-  }
+  };
+
+  // confirmation avant suppression
+  const confirmDelete = (id, imageURL) => {
+    Notiflix.Confirm.show(
+      'Delete Product ?',
+      'You are about delete this product',
+      'Delete',
+      'Cancel',
+      function okCb() {
+        deleteProduct(id, imageURL);
+      },
+      function cancelCb() {
+        console.log("product deleted");
+      },
+      {
+        width: '320px',
+        borderRadius: '3px',
+        titleColor: "orangered",
+        okButtonBackground:"orangered",
+        cssAnimationStyle: "zoom",
+        // etc...
+      },
+    );
+  };
+  // suppression du produit stockage firebase
+  const deleteProduct = async(id, imageURL) => {
+    try {
+      await deleteDoc(doc(db, "products", id));
+      const storageRef = ref(storage, imageURL);
+      await deleteObject(storageRef);
+
+      toast.success("product deleted successfully.")
+      
+    } catch (error) {
+      toast.error(error.message);
+    };
+  };
+
   return (
     <>
+    {isLoading && <Loader />}
     <div className={styles.table}>
     <h2>All Products</h2>
 
@@ -79,15 +122,14 @@ const ViewProducts = () => {
               <td>
                 {`$${price}`}
               </td>
-              <td>
+              <td className={styles.icons}>
                 <Link to="/admin/add-product">
                   <FaEdit size={20} color="green"/>
                 </Link>
                 &nbsp;
-                <FaTrashAlt size={18} color="red"/>
+                <FaTrashAlt size={18} color="red" onClick={() => confirmDelete(id, imageURL)}/>
               </td>
-            </tr>
-            
+            </tr>            
           )
         })}
         </tbody>
