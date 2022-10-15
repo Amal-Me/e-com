@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import Card from '../../card/Card';
 import styles from "./AddProduct.module.scss";
-import {getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
+import {deleteObject, getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
 import {db, storage} from "../../../firebase/config";
 import { toast } from 'react-toastify';
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc, Timestamp } from 'firebase/firestore';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../loader/Loader';
 import { useSelector } from 'react-redux';
@@ -123,9 +123,28 @@ const AddProduct = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // verif et suppression de l'image ds le storage si differente a la modif
+    if(product.imageURL !== productEdit.imageURL) {
+      const storageRef = ref(storage, productEdit.imageURL);
+      deleteObject(storageRef);
+    }
+    // pr update un doc ds firebase
     try {
 
+        setDoc(doc(db, "products", id), {
+          name: product.name,
+          imageURL: product.imageURL,
+          price: Number(product.price),
+          category: product.category,
+          brand: product.brand,
+          desc: product.desc,
+          createdAt: productEdit.createdAt,
+          editedAt:Timestamp.now().toDate()
+      });
 
+      setIsLoading(false);
+      toast.success("Product Edited successfully");
+      navigate("/admin/all-products");
       
     } catch (error) {
       setIsLoading(false);

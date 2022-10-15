@@ -8,53 +8,26 @@ import {FaEdit, FaTrashAlt} from "react-icons/fa";
 import Loader from '../../loader/Loader';
 import { deleteObject, ref } from 'firebase/storage';
 import Notiflix from 'notiflix';
-import { useDispatch } from 'react-redux';
-import { STORE_PRODUCTS } from '../../../redux/slice/productSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectProducts, STORE_PRODUCTS } from '../../../redux/slice/productSlice';
+import useFetchCollection from '../../../customHooks/useFetchCollection';
 
 
 
 const ViewProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const {data, isLoading} = useFetchCollection("products");
+  const products = useSelector(selectProducts);
 
   const dispatch = useDispatch();
 
-  // fetch les produits au chargement de la page
+  // récupération des datas/produits ds le store
   useEffect(() => {
-    getProducts()
-  }, []);
-  
+    dispatch(
+                STORE_PRODUCTS({
+                  products: data,
+                }));
 
-  // récupération des datas/produits sur firebase
-  const getProducts = () => {
-    setIsLoading(true);
-
-    try {
-      const productsRef = collection(db, "products");
-      // tri par date de creation
-      const q = query(productsRef, orderBy("createdAt", "desc"));
-      
-      onSnapshot(q, (Snapshot) => {
-          // console.log(Snapshot.docs);
-          const allProducts = Snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          // console.log(allProducts);
-          setProducts(allProducts);
-          setIsLoading(false);
-          // on stock le state "allProducts" ds le store
-          dispatch(
-            STORE_PRODUCTS({
-              products: allProducts,
-            }))
-        });   
-      
-      } catch (error) {
-        setIsLoading(false);
-        toast.error(error.message);
-      }
-  };
+  }, [data, dispatch]);
 
   // confirmation avant suppression
   const confirmDelete = (id, imageURL) => {

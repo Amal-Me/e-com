@@ -1,4 +1,5 @@
 import React from 'react';
+import Product from '../../components/product/Product';
 // import AdminOnlyRoute from '../../components/adminOnlyRoute/AdminOnlyRoute';
 // import Slider from '../../components/slider/Slider';
 // import styles from "./Home.module.scss";
@@ -8,7 +9,7 @@ const Home = () => {
     <div>
       {/* <AdminOnlyRoute /> */}
       {/* <Slider/> */}
-      <h1>home</h1>
+      <Product/>
     </div>
   )
 }
