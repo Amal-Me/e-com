@@ -9,6 +9,11 @@ const rootReducer = combineReducers({
 
 const store = configureStore({
     reducer: rootReducer, 
+    // exclusion du middleware de vérification d'état sérialisable(sinon crée erreur ex(timeStamp/editProduct))
+    middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({      
+      serializableCheck: false,
+    }),
 });
 
 export default store;
