@@ -8,6 +8,7 @@ import {Home, Contact, Login, Register,Reset,Admin} from "./pages";
 // components/index
 import {Header, Footer} from "./components";
 import AdminOnlyRoute from "./components/adminOnlyRoute/AdminOnlyRoute";
+import ProductDetails from "./components/product/productDetails/ProductDetails";
 
 
 
@@ -23,11 +24,13 @@ function App() {
           <Route  path="/login" element={ <Login/>}/>
           <Route  path="/register" element={ <Register/>}/>
           <Route  path="/reset" element={ <Reset/>}/>
+          
           <Route  path="/admin/*" 
           element={ 
           <AdminOnlyRoute>
             <Admin/>
           </AdminOnlyRoute>}/>
+          <Route  path="/product-details/:id" element={ <ProductDetails/>}/>
         </Routes>
         <Footer />
       </BrowserRouter>
