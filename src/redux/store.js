@@ -5,7 +5,7 @@ import filterReducer from "./slice/filterSlice";
 
 const rootReducer = combineReducers({
     auth: authReducer,
-    product:productReducer,
+    product: productReducer,
     filter: filterReducer,
 });
 
