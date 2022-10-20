@@ -8,6 +8,6 @@ const Card = ({children, cardClass}) => {
         {children}
     </div>
   )
-}
+};
 
 export default Card;
