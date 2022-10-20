@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ADD_TO_CART, CLEAR_CART, DECREASE_CART, REMOVE_FROM_CART, selectCartItems, selectCartTotalAmount, selectCartTotalQuantity } from '../../redux/slice/cartSlice';
+import { ADD_TO_CART, CALCULATE_SUBTOTAL, CALCULATE_TOTAL_QUANTITY, CLEAR_CART, DECREASE_CART, REMOVE_FROM_CART, SAVE_URL, selectCartItems, selectCartTotalAmount, selectCartTotalQuantity } from '../../redux/slice/cartSlice';
 import styles from "./Cart.module.scss";
 import {FaTrashAlt} from "react-icons/fa";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../../components/card/Card';
-
+import { selectIsLoggedIn } from '../../redux/slice/authSlice';
 
 
 
@@ -14,8 +14,10 @@ const Cart = () => {
   const cartItems = useSelector(selectCartItems);
   const cartTotalAmount = useSelector(selectCartTotalAmount);
   const cartTotalQuantity= useSelector(selectCartTotalQuantity);
+  const isLoggedIn = useSelector(selectIsLoggedIn);
+  const dispatch = useDispatch();
 
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
 
   const increaseCart = (cart) => {
     dispatch(ADD_TO_CART(cart));
@@ -33,6 +35,25 @@ const Cart = () => {
     dispatch(CLEAR_CART());
   };
 
+  useEffect(() => {
+    dispatch(CALCULATE_SUBTOTAL())
+    dispatch(CALCULATE_TOTAL_QUANTITY())
+    // on ne veut sauvegarder l url que pr le checkout pas au chargement de la page
+    dispatch(SAVE_URL(""))
+  }, [dispatch, cartItems]);
+ 
+  // check url de la page(on l enregistre ds redux)
+ const url = window.location.href;
+
+//  a la commande si l user est connecte on le redirige vers la page de finalisation sinon login
+ const checkout = () => {
+  if (isLoggedIn) {
+    navigate("/checkout-details")
+  } else {
+    dispatch(SAVE_URL(url))
+    navigate("/login")
+  }
+ };
 
   return (
     <section>    
@@ -100,13 +121,13 @@ const Cart = () => {
                 </div>
                 <br />
                <Card cardClass={styles.card}>
-                <p>{`Cart item(s): ${cartTotalQuantity}`}</p>
+                <p><b>{`Cart item(s): ${cartTotalQuantity}`}</b></p>
                 <div className={styles.text}>
                   <h4>Subtotal:</h4>
                   <h3>{`$${cartTotalAmount.toFixed(2)}`}</h3>
                 </div>
                 <p>Tax an shipping calculated at checkout</p>
-                <button className='--btn --btn-primary --btn-block'>Checkout</button>
+                <button className='--btn --btn-primary --btn-block' onClick={checkout}>Checkout</button>
                </Card>
             </div>
           </div>

@@ -8,14 +8,26 @@ import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 
 import { auth } from '../../firebase/config';
 import { toast } from 'react-toastify';
 import Loader from '../../components/loader/Loader';
+import { useSelector } from 'react-redux';
+import { selectPreviousURL } from '../../redux/slice/cartSlice';
 
 const Login = () => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-
     const navigate = useNavigate();
+    const previousURL = useSelector(selectPreviousURL);
+
+    // si le user vient de la page cart on le renvoi dessus apres login sinon home
+    const redirectUser = () => {
+        if (previousURL.includes("cart")) {
+            return navigate("/cart")
+        }
+        navigate("/")
+    }
+
+    
 
     const loginUser = (e) => {
         e.preventDefault();
@@ -25,8 +37,8 @@ const Login = () => {
     .then((userCredential) => {
             // const user = userCredential.user;
             setIsLoading(false);
-            toast.success("Login successful...")
-            navigate("/");
+            toast.success("Login successful...");
+            redirectUser();
     })
     .catch((error) => {
         setIsLoading(false);
@@ -41,7 +53,7 @@ const Login = () => {
         .then((result) => {
             // const user = result.user;
             toast.success("Login successfully");
-            navigate("/");
+            redirectUser();
         }).catch((error) => {
             toast.error(error.message);
         });

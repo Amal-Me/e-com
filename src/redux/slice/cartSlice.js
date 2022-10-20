@@ -5,6 +5,7 @@ const initialState = {
     cartItems: localStorage.getItem("cartItems") ? JSON.parse(localStorage.getItem("cartItems")) : [],
     cartTotalQuantity: 0,
     cartTotalAmount: 0,
+    previousURL: "",
 };
 
 const cartSlice = createSlice({
@@ -58,15 +59,54 @@ const cartSlice = createSlice({
       toast.info(`Cart cleared`, {position: "top-left"});
       // update localStorage
       localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
-    },     
+    },  
+    CALCULATE_SUBTOTAL(state, action)  {
+      // ss total panier
+      const array = [];
+      state.cartItems.map((item) => {
+        const {price, cartQuantity} = item
+        // total d 1 prod * sa quantite
+        const cartItemAmount = price * cartQuantity;
+        return  array.push(cartItemAmount);
+      });
+      // additione ts les elements du tab
+      const totalAmount = array.reduce((a, b) => {
+        return a + b
+        // initialisation a 0 pr eviter les erreurs au clear/rechargement page
+      }, 0);
+      // update le state
+      state.cartTotalAmount = totalAmount;
+    },
+    CALCULATE_TOTAL_QUANTITY(state, action) {
+      const array = [];
+      // recup les quantités de prods
+      state.cartItems.map((item) => {
+        const {cartQuantity} = item
+        const quantity = cartQuantity;
+        return  array.push(quantity);
+      });
+      // additione ts les elements du tab
+      const totalQuantity = array.reduce((a, b) => {
+        return a + b
+        // initialisation a 0 pr eviter les erreurs au clear/rechargement page
+      }, 0);
+      // update le state
+      state.cartTotalQuantity = totalQuantity;
+    },
+    SAVE_URL(state,action) {
+      // sauvegarde url pr checkout
+      console.log(action.payload);
+      state.previousURL = action.payload;
+    }
   },
 });
 
-export const {ADD_TO_CART, DECREASE_CART, REMOVE_FROM_CART, CLEAR_CART} = cartSlice.actions;
+export const {ADD_TO_CART, DECREASE_CART, REMOVE_FROM_CART, CLEAR_CART, CALCULATE_SUBTOTAL, CALCULATE_TOTAL_QUANTITY, SAVE_URL} = cartSlice.actions;
 
 export const selectCartItems = (state) => state.cart.cartItems;
 export const selectCartTotalQuantity = (state) => state.cart.cartTotalQuantity;
 export const selectCartTotalAmount = (state) => state.cart.cartTotalAmount;
+export const selectPreviousURL = (state) => state.cart.previousURL;
 
 
 export default cartSlice.reducer;
