@@ -3,27 +3,37 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emailjs/browser": "^3.6.2",
     "@apideck/better-ajv-errors": "^0.3.6",
     "@reduxjs/toolkit": "^1.8.6",
+    "@stripe/react-stripe-js": "^1.7.2",
+    "@stripe/stripe-js": "^1.29.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "ajv": "^8.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
     "firebase": "^9.12.1",
     "node-sass": "^7.0.3",
     "notiflix": "^3.2.5",
     "react": "^18.2.0",
+    "react-chartjs-2": "^4.1.0",
     "react-country-region-selector": "^3.6.1",
     "react-dom": "^18.2.0",
     "react-icons": "^4.6.0",
     "react-redux": "^8.0.4",
     "react-router-dom": "^6.4.2",
     "react-scripts": "5.0.1",
+    "react-star-rate": "^0.2.0",
     "react-toastify": "^9.0.8",
-    "typescript": "^4.8.4"
+    "stripe": "^8.219.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start:frontend": "react-scripts start",
+    "start:backend": "nodemon server.js",
+    "start": "node server",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -45,5 +55,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "homepage": "http://localhost:3000/"
 }
